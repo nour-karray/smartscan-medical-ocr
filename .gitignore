@@ -34,6 +34,9 @@ migrate_working_dir/
 build/
 /coverage/
 
+# Local duplicate project copy
+/projetFlutter/
+
 # Python virtual environments and caches
 backend/.venv/
 .venv/

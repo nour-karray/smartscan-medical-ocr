@@ -12,13 +12,9 @@ class FirebaseBootstrap {
     if (_initialized) return;
 
     try {
-      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-        await Firebase.initializeApp();
-      } else {
-        await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        );
-      }
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
       _initialized = true;
     } catch (e, st) {
       debugPrint('Firebase initialization failed: $e\n$st');

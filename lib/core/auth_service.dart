@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthActionResult {
   const AuthActionResult._({required this.success, this.message});
@@ -19,6 +20,7 @@ class AuthActionResult {
 
 class AuthService extends ChangeNotifier {
   StreamSubscription<User?>? _authSub;
+  bool _googleInitialized = false;
   User? _currentUser;
   bool _isReady = false;
   bool _isBusy = false;
@@ -103,6 +105,35 @@ class AuthService extends ChangeNotifier {
     });
   }
 
+  Future<AuthActionResult> signInWithGoogle() async {
+    return _runAuthAction(() async {
+      if (kIsWeb) {
+        final credential = await FirebaseAuth.instance.signInWithPopup(
+          GoogleAuthProvider(),
+        );
+        if (credential.user == null) {
+          return AuthActionResult.failure('Connexion Google annulee.');
+        }
+        return AuthActionResult.success();
+      }
+
+      await _ensureGoogleInitialized();
+      final googleUser = await GoogleSignIn.instance.authenticate();
+
+      final googleAuth = googleUser.authentication;
+      final idToken = googleAuth.idToken;
+      if (idToken == null || idToken.trim().isEmpty) {
+        return AuthActionResult.failure(
+          'Configuration Google incomplete. Ajoutez la SHA-1 Android dans Firebase, telechargez un nouveau google-services.json, puis relancez l application.',
+        );
+      }
+
+      final authCredential = GoogleAuthProvider.credential(idToken: idToken);
+      await FirebaseAuth.instance.signInWithCredential(authCredential);
+      return AuthActionResult.success();
+    });
+  }
+
   Future<AuthActionResult> sendPasswordResetEmail({
     required String email,
   }) async {
@@ -149,10 +180,21 @@ class AuthService extends ChangeNotifier {
 
   Future<void> signOut() async {
     if (Firebase.apps.isEmpty) return;
+    if (!kIsWeb && _googleInitialized) {
+      try {
+        await GoogleSignIn.instance.signOut();
+      } catch (_) {}
+    }
     await FirebaseAuth.instance.signOut();
     _currentUser = null;
     _errorMessage = null;
     notifyListeners();
+  }
+
+  Future<void> _ensureGoogleInitialized() async {
+    if (_googleInitialized) return;
+    await GoogleSignIn.instance.initialize();
+    _googleInitialized = true;
   }
 
   Future<AuthActionResult> _runAuthAction(
