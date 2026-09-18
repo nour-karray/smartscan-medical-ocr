@@ -12,11 +12,7 @@ class OcrServiceResult {
 class OcrService {
   bool get isSupportedPlatform => !kIsWeb;
 
-  Future<OcrServiceResult> extractText({
-    required String imagePath,
-    required Uint8List imageBytes,
-    String sourceFileName = 'scan.jpg',
-  }) async {
+  Future<OcrServiceResult> extractText({required String imagePath}) async {
     if (!isSupportedPlatform) {
       return const OcrServiceResult(
         success: false,
@@ -25,18 +21,6 @@ class OcrService {
       );
     }
     return _extractWithMlKit(imagePath);
-  }
-
-  // TODO: implement with pdfx when PDF rendering / OCR from rasterized pages is enabled.
-  Future<OcrServiceResult> extractTextFromBytes({
-    required Uint8List bytes,
-    required String sourceFileName,
-  }) async {
-    return const OcrServiceResult(
-      success: false,
-      errorMessage:
-          'OCR depuis bytes non supporte en mode local actuel (PDF/web). Utilise une image locale Android/iOS.',
-    );
   }
 
   Future<OcrServiceResult> _extractWithMlKit(String imagePath) async {

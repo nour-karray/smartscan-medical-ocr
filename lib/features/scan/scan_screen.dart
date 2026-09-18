@@ -192,11 +192,7 @@ class _ScanScreenState extends State<ScanScreen> {
       return;
     }
 
-    final result = await widget.ocrService.extractText(
-      imagePath: path,
-      imageBytes: bytes,
-      sourceFileName: fileName,
-    );
+    final result = await widget.ocrService.extractText(imagePath: path);
     if (!mounted) return;
 
     if (result.success && result.text != null) {
