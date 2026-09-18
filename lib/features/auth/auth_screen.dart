@@ -549,7 +549,8 @@ class _AuthScreenState extends State<AuthScreen> {
             ? 'Your data stays protected. The app uses Firebase Authentication to secure access.'
             : 'Vos donnees sont protegees. L application utilise Firebase Authentication pour securiser l acces.');
 
-  String _googleInfoMessage([String? fallback]) => fallback ??
+  String _googleInfoMessage([String? fallback]) =>
+      fallback ??
       (_isArabic
           ? 'Activez Google Sign-In dans Firebase Console puis regenerez google-services.json.'
           : (!_isFrench
